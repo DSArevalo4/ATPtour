@@ -101,7 +101,7 @@ with c3:
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.subheader("Vista previa")
-st.dataframe(df.head(50), use_container_width=True)
+st.dataframe(df.head(50), width='stretch')
 
 # ==========================
 # Guardado
@@ -132,3 +132,48 @@ with colB:
 
 csv_bytes = df.to_csv(index=False).encode("utf-8")
 st.download_button("Descargar CSV limpio", data=csv_bytes, file_name="atp_matches_2004_clean.csv", mime="text/csv")
+
+# ==========================
+# Análisis global (gráficas)
+# ==========================
+import subprocess
+import sys
+
+ANALYSIS_SCRIPT = os.path.join(os.path.dirname(__file__), 'analysis', 'analysis.py')
+OUT_DIR = os.path.join(os.path.dirname(__file__), 'outputs')
+OUT_MATCHES = os.path.join(OUT_DIR, 'matches_per_year_surface.png')
+OUT_TOP10 = os.path.join(OUT_DIR, 'top10_winners.png')
+
+st.subheader("Análisis y gráficas")
+col1, col2 = st.columns([1, 2])
+with col1:
+    if st.button("Regenerar gráficas"):
+        try:
+            proc = subprocess.run([sys.executable, ANALYSIS_SCRIPT], capture_output=True, text=True, check=True)
+            st.success("Gráficas regeneradas correctamente.")
+            st.code(proc.stdout)
+        except subprocess.CalledProcessError as e:
+            st.error("Error al generar las gráficas. Revisa la salida abajo.")
+            st.code(e.stdout + "\n" + e.stderr)
+
+    show_images = st.checkbox("Mostrar gráficas", True)
+
+with col2:
+    if show_images:
+        imgs = []
+        captions = []
+        if os.path.exists(OUT_MATCHES):
+            imgs.append(OUT_MATCHES); captions.append('Partidos por año y superficie')
+        else:
+            st.info(f'No se encontró {OUT_MATCHES}. Pulsa "Regenerar gráficas" para crearlo.')
+
+        if os.path.exists(OUT_TOP10):
+            imgs.append(OUT_TOP10); captions.append('Top 10 ganadores por victorias')
+        else:
+            st.info(f'No se encontró {OUT_TOP10}. Pulsa "Regenerar gráficas" para crearlo.')
+
+        for img, cap in zip(imgs, captions):
+            try:
+                st.image(img, caption=cap, width='stretch')
+            except Exception as e:
+                st.error(f'No se pudo mostrar {img}: {e}')

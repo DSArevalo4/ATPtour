@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  atp-tour-etl:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: atp-tour-etl:latest
+    container_name: atp-tour-pipeline
+    
+    # Mapear puerto de Streamlit
+    ports:
+      - "8501:8501"
+    
+    # Volúmenes para persistencia de datos
+    volumes:
+      - ./outputs:/app/outputs
+      - ./Extract:/app/Extract
+      - ./Load:/app/Load
+      - ./tennis_atp_data:/app/tennis_atp_data:ro  # Read-only para datos fuente
+    
+    # Variables de entorno
+    environment:
+      - PYTHONUNBUFFERED=1
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    
+    # Recursos limitados (opcional, descomentar si necesitas control)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.0'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '1.0'
+    #       memory: 512M
+    
+    # Reinicio automático (opcional)
+    restart: unless-stopped
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "python", "-c", "import pandas, matplotlib, seaborn, streamlit; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Network
+    networks:
+      - atp-network
+
+# Definir red personalizada (opcional)
+networks:
+  atp-network:
+    driver: bridge
+
+# Volúmenes nombrados (alternativa a bind mounts)
+# volumes:
+#   atp-outputs:
+#   atp-extract:
+#   atp-load:

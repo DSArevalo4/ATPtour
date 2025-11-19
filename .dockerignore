@@ -1,0 +1,58 @@
+# Directorios y archivos a ignorar en Docker build
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebooks
+notebooks/
+*.ipynb
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentación adicional (mantener solo README principal)
+*.md
+!README.md
+!DOCKER_INSTRUCTIONS.md
+!DOCKER_SECURITY.md
+
+# Datos procesados (se generan en runtime)
+outputs/*.png
+Extract/*.csv
+Extract/Files/
+*.html
+*.db
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Otros
+To-delete/
+.pytest_cache/
+.coverage
+htmlcov/
